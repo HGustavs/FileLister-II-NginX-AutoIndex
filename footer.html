@@ -1,13 +1,17 @@
 <script>
     var files=[];
     var h1=document.querySelector("h1");
+
+    var currdir=1;
+    var sortfield="Name";
+
     var css=`body{
                   background:#000;
                   color:#eee;
               }
               td{
                  padding-left:6px; padding-right:4px;
-                 border-right:1px solid black;
+                 border-right:1px solid #888;
                  text-align:left;
              }
              td.spec{
@@ -42,8 +46,20 @@
 
     function sort(col)
     {
+        curr=localStorage.getItem("sortfield");
+        currdir=parseInt(localStorage.getItem("sortdir"));
+        if(col==curr){
+            if(currdir=="1"){
+                currdir=-1;
+            }else{
+                currdir=1;
+            }
+            localStorage.setItem("sortdir",currdir);
+        }else{
+            localStorage.setItem("sortfield",col);
+        }
         if(col=="kind"){
-            files.sort(function compareKind(a, b) { if(a.type>b.type){return 1}else{return -1}});
+            files.sort(function compareKind(a, b) { if(a.type>b.type){return 1*currdir}else{return -1*currdir}});
         }
         render();
     }
@@ -51,10 +67,41 @@
     function render()
     {
         var str="";
+        var sortfield=localStorage.getItem("sortfield");
+        if(sortfield==null) sortfield="name";
+        var sortdir=localStorage.getItem("sortdir");
+
         str+="<table>";
 
-        str+="<tr style='background:#eee;'>";
-        str+=`<th></th><th onclick='sort("name");'>Filename</th><th onclick='sort("kind");'>Kind</th><th colspan='4' onclick='sort("date");'>Date</th><th colspan='2' onclick='sort("size");'>Size</th>`;
+        str+="<tr style='background:#eee;'><th></th>";
+        
+        if(sortdir==1){
+            var sortstr="&#9650;";
+        }else{
+          var sortstr="&#9660;";
+        }  
+
+        if(sortfield=="name"){
+            str+=`<th onclick='sort("name");'>Filename${sortstr}</th>`;
+        }else{
+            str+=`<th onclick='sort("name");'>Filename</th>`;
+        }
+        if(sortfield=="kind"){
+            str+=`<th onclick='sort("kind");'>Kind${sortstr}</th>`;
+        }else{
+            str+=`<th onclick='sort("kind");'>Kind</th>`;
+        }
+        if(sortfield=="date"){
+            str+=`<th colspan='4' onclick='sort("date");'>Date${sortstr}</th>`;
+        }else{
+            str+=`<th colspan='4' onclick='sort("date");'>Date</th>`;
+        }        
+        if(sortfield=="size"){
+            str+=`<th colspan='2' onclick='sort("size");'>Size${sortstr}</th>`;
+        }else{
+            str+=`<th colspan='2' onclick='sort("size");'>Size</th>`;
+        }  
+
         str+="</tr>";
 
         for(file of files){
