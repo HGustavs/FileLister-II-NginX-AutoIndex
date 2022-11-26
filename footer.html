@@ -63,6 +63,10 @@
                 str+="<td><img src='"+file.name+"' style='width:16px;height:16px;'>"
             }else if(file.type==""){
                 str+="<td><img src='/autoindex/foldericon.svg' style='width:16px;height:16px;'>"
+            }else if(file.type=="html"){
+                str+="<td><img src='/autoindex/documenticon.svg' style='width:16px;height:18px;'>"
+            }else if(file.type=="json"){
+                str+="<td><img src='/autoindex/dataicon.svg' style='width:16px;height:18px;'>"
             }else{
                 str+="<td></td>";
             }             
