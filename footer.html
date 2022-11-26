@@ -1,0 +1,136 @@
+<script>
+    var files=[];
+    var h1=document.querySelector("h1");
+    var css=`body{
+                  background:#000;
+                  color:#eee;
+              }
+              td{
+                 padding-left:6px; padding-right:4px;
+                 border-right:1px solid black;
+                 text-align:left;
+             }
+             td.spec{
+                border:none;
+                padding-left:2px;
+                padding-right:2px;
+                text-align:left;
+             }
+             td.specr{
+                border:none;
+                padding-left:2px;
+                padding-right:2px;
+                text-align:right;
+             }             
+             table{
+                 font-family:Arial Narrow;
+                 border-collapse:collapse;
+                 border:2px solid #888;
+          }
+          a{
+            color:#ddc;
+            text-decoration: none;
+          }
+          hr {
+            display:none;
+          }
+          th{background:#888;color:#333}
+          tr:nth-child(even) {background: #222}
+          tr:nth-child(odd) {background: #333}
+          h1{font-family:Arial Narrow; font-size:20px;margin-bottom:8px;}          
+          `;
+
+    function sort(col)
+    {
+        if(col=="kind"){
+            files.sort(function compareKind(a, b) { if(a.type>b.type){return 1}else{return -1}});
+        }
+        render();
+    }
+
+    function render()
+    {
+        var str="";
+        str+="<table>";
+
+        str+="<tr style='background:#eee;'>";
+        str+=`<th></th><th onclick='sort("name");'>Filename</th><th onclick='sort("kind");'>Kind</th><th colspan='4' onclick='sort("date");'>Date</th><th colspan='2' onclick='sort("size");'>Size</th>`;
+        str+="</tr>";
+
+        for(file of files){
+            str+="<tr>";
+            if(file.type=="png"){
+                str+="<td><img src='"+file.name+"' style='width:16px;height:16px;'>"
+            }else if(file.type==""){
+                str+="<td><img src='/autoindex/foldericon.svg' style='width:16px;height:16px;'>"
+            }else{
+                str+="<td></td>";
+            }             
+            str+="<td><a href='"+file.name+"'>"+file.name+"</a></td>";
+            str+="<td>"+file.type+"</td>";
+            str+="<td class='spec'>"+file.day+"</td>";
+            str+="<td class='spec'>"+file.month+"</td>";
+            str+="<td class='spec'>"+file.year+"</td>";
+            str+="<td class='spec'>"+file.time+"</td>";            
+            str+="<td class='specr'>"+file.size+"</td>";
+            str+="<td class='spec'>"+file.unit+"</td>";
+            str+="</tr>";
+        }
+        str+="</table>";
+        document.getElementById("mainpre").innerHTML=str;
+    }
+
+    if(h1!=null){
+      var h1txt=h1.innerText;
+      if(h1txt.indexOf("Index of")===0){
+          var mainpre=document.querySelector("pre");
+
+          var style = document.createElement('style');          
+          style.appendChild(document.createTextNode(css));
+          document.head.appendChild(style);
+
+          // Iterate over directory structure
+          var filelist=document.querySelectorAll("pre a");
+          for(file of filelist){
+            var part=file.nextSibling.textContent.trim().split(" ");
+            var innerfile={};
+            innerfile.name=file.innerText;
+            innerfile.type="";
+            if(innerfile.name.indexOf(".")>0){
+                innerfile.type=innerfile.name.substr(innerfile.name.lastIndexOf('.')+1);
+            }
+            for(var i=0;i<part.length;i++){
+                if(i==0){
+                  var temptim=part[i];
+                  innerfile.day=temptim.substr(0,2);
+                  innerfile.month=temptim.substr(3,3);
+                  innerfile.year=temptim.substr(7,4);
+                  innerfile.realsize=7;
+                }
+                if(i==1) innerfile.time=part[i];
+                if(part[i]!=""){
+                    innerfile.realsize=part[i];
+                } 
+                
+                if(innerfile.realsize=="-"){
+                    innerfile.unit="";
+                    innerfile.size="";
+                }else if(innerfile.realsize<1024){
+                    innerfile.unit="Bytes";
+                    innerfile.size=innerfile.realsize;
+                }else if(innerfile.realsize<1048576){
+                    innerfile.unit="KB";
+                    innerfile.size=Math.round(innerfile.realsize/1024)
+                }else{
+                    innerfile.unit="MB";
+                    innerfile.size=Math.round(innerfile.realsize/1048576)
+                }
+            }
+            files.push(innerfile);
+          }
+          mainpre.outerHTML="<div id='mainpre'></div>";
+
+          render();
+      }
+  } 
+</script>
